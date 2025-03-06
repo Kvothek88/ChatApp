@@ -1,4 +1,6 @@
-const socket = io('http://192.168.2.2:3500')
+const socket = io(window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" 
+    ? "http://localhost:3500" 
+    : "/")
 
 const msgInput = document.querySelector('#message')
 const nameInput = document.querySelector('#name')
@@ -41,24 +43,17 @@ msgInput.addEventListener('keypress', () => {
     socket.emit('activity', nameInput.value)
 })
 
+
 let activityTimer;
 let typingIndicator = null;
 
-function moveTypingIndicatorToEnd() {
-    if (typingIndicator && typingIndicator.parentNode) {
-        typingIndicator.parentNode.appendChild(typingIndicator);
-    }
-}
-
 // Listen for messages 
 socket.on("message", (data) => {
-    // Clear any typing indicator text (from your original code)
-    if (activity) activity.textContent = "";
 
     if (typingIndicator) {
-    typingIndicator.style.display = 'none';
-    clearTimeout(activityTimer); // Stop any pending timeout
-}
+        typingIndicator.remove();
+        typingIndicator = null;
+    }
     
     const { name, text, time } = data;
     const li = document.createElement('li');
@@ -82,16 +77,11 @@ socket.on("message", (data) => {
     }
     
     chatDisplay.appendChild(li);
-    
-    // Move typing indicator to the end if it exists
-    moveTypingIndicatorToEnd();
-    
-    // Scroll to bottom
-    chatDisplay.scrollTop = chatDisplay.scrollHeight;
 });
 
+
+
 socket.on("activity", () => {
-    // If typing indicator doesn't exist yet, create it
     if (!typingIndicator) {
         typingIndicator = document.createElement('li');
         typingIndicator.className = 'chat-bubble-container';
@@ -110,14 +100,8 @@ socket.on("activity", () => {
     } else {
         // If it was previously hidden, show it again
         typingIndicator.style.display = 'block';
-        
-        // Ensure it's at the end
-        moveTypingIndicatorToEnd();
     }
-    
-    // Scroll to bottom when typing indicator appears
-    chatDisplay.scrollTop = chatDisplay.scrollHeight;
-    
+
     // Reset the timer
     clearTimeout(activityTimer);
     activityTimer = setTimeout(() => {

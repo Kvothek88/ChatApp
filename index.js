@@ -27,12 +27,9 @@ const UsersState = {
 
 const io = new Server(expressServer, {
     cors: {
-        origin: [
-            "http://localhost:5500", 
-            "http://127.0.0.1:5500", 
-            "http://192.168.2.2:5500"  // Add the client's local network URL
-        ],
-        methods: ["GET", "POST"]
+        origin: process.env.NODE_ENV === "production" 
+        ? [process.env.RENDER_EXTERNAL_URL || "*"] 
+        : ["http://localhost:5500", "http://127.0.0.1:5500"]
     }
 })
 
